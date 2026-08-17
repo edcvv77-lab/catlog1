@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - v3-professional
 
 permissions:
   contents: read
@@ -38,15 +39,15 @@ jobs:
       - name: Build installable APK
         run: |
           gradle :app:assembleDebug --stacktrace
-          cp app/build/outputs/apk/debug/app-debug.apk masaedi-alyoumi-v2.0.0.apk
-          sha256sum masaedi-alyoumi-v2.0.0.apk > masaedi-alyoumi-v2.0.0.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk masaedi-alyoumi-v3.0.0.apk
+          sha256sum masaedi-alyoumi-v3.0.0.apk > masaedi-alyoumi-v3.0.0.sha256
 
       - name: Upload final APK
         uses: actions/upload-artifact@v4
         with:
-          name: masaedi-alyoumi-v2.0.0
+          name: masaedi-alyoumi-v3.0.0
           path: |
-            masaedi-alyoumi-v2.0.0.apk
-            masaedi-alyoumi-v2.0.0.sha256
+            masaedi-alyoumi-v3.0.0.apk
+            masaedi-alyoumi-v3.0.0.sha256
           if-no-files-found: error
           retention-days: 30
