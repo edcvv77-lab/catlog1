@@ -41,8 +41,8 @@ data class HabitItem(
 class AppState(context: Context) {
     private val prefs = context.getSharedPreferences("daily_companion", Context.MODE_PRIVATE)
 
-    var profileName by mutableStateOf(prefs.getString("profile_name", "محمد حافظ") ?: "محمد حافظ")
-        private set
+    private var _profileName by mutableStateOf(prefs.getString("profile_name", "محمد حافظ") ?: "محمد حافظ")
+    val profileName: String get() = _profileName
 
     val goals = mutableStateListOf<GoalItem>()
     val ideas = mutableStateListOf<IdeaItem>()
@@ -159,9 +159,9 @@ class AppState(context: Context) {
         }
     }
 
-    fun updateProfileName(value: String) {
+    fun setProfileName(value: String) {
         val cleaned = value.trim().ifBlank { "محمد حافظ" }
-        profileName = cleaned
+        _profileName = cleaned
         prefs.edit().putString("profile_name", cleaned).apply()
     }
 
