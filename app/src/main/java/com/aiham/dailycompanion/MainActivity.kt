@@ -21,25 +21,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.EventNote
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.TrackChanges
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -73,17 +69,23 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val state = remember { AppState(applicationContext) }
+            val state = remember { ProfessionalState(applicationContext) }
             DailyCompanionTheme(darkTheme = state.darkMode) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    AppRoot(state)
+                    ProfessionalAppRoot(state)
                 }
             }
         }
     }
 }
 
+/** Kept for the legacy 2.x screen source file so old code remains buildable during migration. */
 enum class AppScreen(val label: String) {
+    Home("الرئيسية"), Goals("أهدافي"), Ideas("أفكاري"), Notes("ملاحظاتي"), Habits("العادات"),
+    Photos("صوري"), Journal("يومي"), Settings("الإعدادات"), More("المزيد")
+}
+
+enum class ProScreen(val label: String) {
     Home("الرئيسية"),
     Goals("أهدافي"),
     Ideas("أفكاري"),
@@ -95,30 +97,23 @@ enum class AppScreen(val label: String) {
     More("المزيد")
 }
 
-private enum class QuickType(val title: String, val emoji: String) {
-    Goal("هدف جديد", "🎯"),
-    Idea("فكرة جديدة", "💡"),
-    Note("ملاحظة جديدة", "📝"),
-    Habit("عادة جديدة", "✅")
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppRoot(state: AppState) {
-    var screen by rememberSaveable { mutableStateOf(AppScreen.Home) }
+private fun ProfessionalAppRoot(state: ProfessionalState) {
+    var screen by rememberSaveable { mutableStateOf(ProScreen.Home) }
     var addSheet by rememberSaveable { mutableStateOf(false) }
-    var quickType by remember { mutableStateOf<QuickType?>(null) }
+    var quickType by remember { mutableStateOf<ProQuickType?>(null) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            AppBottomBar(
+            ProfessionalBottomBar(
                 current = screen,
-                onHome = { screen = AppScreen.Home },
-                onGoals = { screen = AppScreen.Goals },
+                onHome = { screen = ProScreen.Home },
+                onGoals = { screen = ProScreen.Goals },
                 onAdd = { addSheet = true },
-                onPhotos = { screen = AppScreen.Photos },
-                onMore = { screen = AppScreen.More }
+                onPhotos = { screen = ProScreen.Photos },
+                onMore = { screen = ProScreen.More }
             )
         }
     ) { inner ->
@@ -127,32 +122,41 @@ private fun AppRoot(state: AppState) {
             color = MaterialTheme.colorScheme.background
         ) {
             when (screen) {
-                AppScreen.Home -> HomeScreen(state, onNavigate = { screen = it })
-                AppScreen.Goals -> GoalsScreen(state)
-                AppScreen.Ideas -> IdeasScreen(state)
-                AppScreen.Notes -> NotesScreen(state)
-                AppScreen.Habits -> HabitsScreen(state)
-                AppScreen.Photos -> PhotosScreen(state)
-                AppScreen.Journal -> JournalScreen(state)
-                AppScreen.Settings -> SettingsScreen(state, onNavigate = { screen = it })
-                AppScreen.More -> MoreScreen(state, onNavigate = { screen = it })
+                ProScreen.Home -> ProfessionalHomeScreen(state) { screen = it }
+                ProScreen.Goals -> ProfessionalGoalsScreen(state)
+                ProScreen.Ideas -> ProfessionalIdeasScreen(state)
+                ProScreen.Notes -> ProfessionalNotesScreen(state)
+                ProScreen.Habits -> ProfessionalHabitsScreen(state)
+                ProScreen.Photos -> ProfessionalPhotosScreen(state)
+                ProScreen.Journal -> ProfessionalJournalScreen(state)
+                ProScreen.Settings -> ProfessionalSettingsScreen(state) { screen = it }
+                ProScreen.More -> ProfessionalMoreScreen(state) { screen = it }
             }
         }
     }
 
     if (addSheet) {
-        ModalBottomSheet(onDismissRequest = { addSheet = false }) {
+        ModalBottomSheet(onDismissRequest = { addSheet = false }, shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(9.dp)
             ) {
-                Text("إضافة سريعة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text("أضف ما تحتاجه بدون مغادرة سياقك الحالي.", color = AppMuted, fontSize = 13.sp)
-                QuickType.entries.forEach { type ->
-                    QuickAddRow(type.title, type.emoji) {
+                Text("إضافة سريعة", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
+                Text("سجّل ما خطر لك الآن بدون البحث داخل التطبيق.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = .56f), fontSize = 12.sp)
+                Spacer(Modifier.height(2.dp))
+                ProQuickType.entries.forEach { type ->
+                    ProfessionalQuickRow(type.emoji, type.title) {
                         addSheet = false
                         quickType = type
                     }
+                }
+                ProfessionalQuickRow("📷", "إضافة صورة أو لحظة") {
+                    addSheet = false
+                    screen = ProScreen.Photos
+                }
+                ProfessionalQuickRow("📔", "تسجيل يومي") {
+                    addSheet = false
+                    screen = ProScreen.Journal
                 }
                 Spacer(Modifier.height(18.dp))
             }
@@ -160,15 +164,15 @@ private fun AppRoot(state: AppState) {
     }
 
     quickType?.let { type ->
-        QuickCreateDialog(
+        ProQuickCreateDialog(
             type = type,
             onDismiss = { quickType = null },
             onSave = { title, body, emoji ->
                 when (type) {
-                    QuickType.Goal -> state.addGoal(title, emoji, body)
-                    QuickType.Idea -> state.addIdea(title, body, emoji)
-                    QuickType.Note -> state.addNote(title, body, emoji)
-                    QuickType.Habit -> state.addHabit(title, emoji)
+                    ProQuickType.Goal -> state.addGoal(title, emoji, body)
+                    ProQuickType.Idea -> state.addIdea(title, body, emoji)
+                    ProQuickType.Note -> state.addNote(title, body, emoji)
+                    ProQuickType.Habit -> state.addHabit(title, emoji)
                 }
                 quickType = null
             }
@@ -177,40 +181,37 @@ private fun AppRoot(state: AppState) {
 }
 
 @Composable
-private fun AppBottomBar(
-    current: AppScreen,
+private fun ProfessionalBottomBar(
+    current: ProScreen,
     onHome: () -> Unit,
     onGoals: () -> Unit,
     onAdd: () -> Unit,
     onPhotos: () -> Unit,
     onMore: () -> Unit
 ) {
-    Surface(shadowElevation = 14.dp, color = MaterialTheme.colorScheme.surface) {
+    Surface(shadowElevation = 18.dp, color = MaterialTheme.colorScheme.surface) {
         NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 0.dp) {
-            BottomNavItem("الرئيسية", Icons.Rounded.Home, current == AppScreen.Home, onHome)
-            BottomNavItem("أهدافي", Icons.Rounded.TrackChanges, current == AppScreen.Goals, onGoals)
+            ProBottomItem("الرئيسية", Icons.Rounded.Home, current == ProScreen.Home, onHome)
+            ProBottomItem("أهدافي", Icons.Rounded.TrackChanges, current == ProScreen.Goals, onGoals)
             NavigationBarItem(
                 selected = false,
                 onClick = onAdd,
                 icon = {
-                    Box(
-                        Modifier.size(50.dp).background(AppPurple, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Rounded.Add, contentDescription = "إضافة", tint = Color.White)
+                    Box(Modifier.size(52.dp).background(MaterialTheme.colorScheme.primary, CircleShape), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Rounded.Add, contentDescription = "إضافة", tint = Color.White, modifier = Modifier.size(27.dp))
                     }
                 },
                 label = { Text("إضافة", fontSize = 10.sp) },
                 colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent)
             )
-            BottomNavItem("صوري", Icons.Rounded.PhotoLibrary, current == AppScreen.Photos, onPhotos)
-            BottomNavItem("المزيد", Icons.Rounded.MoreHoriz, current == AppScreen.More, onMore)
+            ProBottomItem("صوري", Icons.Rounded.PhotoLibrary, current == ProScreen.Photos, onPhotos)
+            ProBottomItem("المزيد", Icons.Rounded.MoreHoriz, current == ProScreen.More, onMore)
         }
     }
 }
 
 @Composable
-private fun androidx.compose.foundation.layout.RowScope.BottomNavItem(
+private fun androidx.compose.foundation.layout.RowScope.ProBottomItem(
     label: String,
     icon: ImageVector,
     selected: Boolean,
@@ -225,78 +226,28 @@ private fun androidx.compose.foundation.layout.RowScope.BottomNavItem(
             selectedIconColor = MaterialTheme.colorScheme.primary,
             selectedTextColor = MaterialTheme.colorScheme.primary,
             indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-            unselectedIconColor = AppMuted,
-            unselectedTextColor = AppMuted
+            unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f),
+            unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f)
         )
     )
 }
 
 @Composable
-private fun QuickAddRow(title: String, emoji: String, onClick: () -> Unit) {
+private fun ProfessionalQuickRow(emoji: String, title: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = .45f))
+            .clip(RoundedCornerShape(19.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = .48f))
             .clickable(onClick = onClick)
-            .padding(16.dp),
+            .padding(horizontal = 15.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(emoji, fontSize = 25.sp)
-        Spacer(Modifier.width(12.dp))
+        Box(Modifier.size(42.dp).background(MaterialTheme.colorScheme.surface.copy(alpha = .82f), RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) {
+            Text(emoji, fontSize = 22.sp)
+        }
+        Spacer(Modifier.width(11.dp))
         Text(title, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
         Icon(Icons.Rounded.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
     }
-}
-
-@Composable
-private fun QuickCreateDialog(
-    type: QuickType,
-    onDismiss: () -> Unit,
-    onSave: (title: String, body: String, emoji: String) -> Unit
-) {
-    var title by remember(type) { mutableStateOf("") }
-    var body by remember(type) { mutableStateOf("") }
-    var emoji by remember(type) { mutableStateOf(type.emoji) }
-    val needsBody = type != QuickType.Habit
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(type.title, fontWeight = FontWeight.Bold) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        value = emoji,
-                        onValueChange = { emoji = it.take(3) },
-                        label = { Text("رمز") },
-                        modifier = Modifier.width(92.dp),
-                        singleLine = true
-                    )
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = { Text(if (type == QuickType.Habit) "اسم العادة" else "العنوان") },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true
-                    )
-                }
-                if (needsBody) {
-                    OutlinedTextField(
-                        value = body,
-                        onValueChange = { body = it },
-                        label = { Text(if (type == QuickType.Goal) "تفاصيل الهدف" else "التفاصيل") },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 3
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(onClick = { onSave(title, body, emoji) }, enabled = title.isNotBlank() || (needsBody && body.isNotBlank())) {
-                Text("حفظ")
-            }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("إلغاء") } }
-    )
 }
