@@ -159,7 +159,7 @@ class AppState(context: Context) {
         }
     }
 
-    fun setProfileName(value: String) {
+    fun updateProfileName(value: String) {
         val cleaned = value.trim().ifBlank { "محمد حافظ" }
         profileName = cleaned
         prefs.edit().putString("profile_name", cleaned).apply()
