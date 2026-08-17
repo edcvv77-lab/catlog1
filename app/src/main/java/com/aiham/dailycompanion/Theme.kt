@@ -1,42 +1,51 @@
 package com.aiham.dailycompanion
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-val AppPurple = Color(0xFF6F63E8)
-val AppPurpleDark = Color(0xFF5145C9)
-val AppLavender = Color(0xFFF0EDFF)
-val AppBackground = Color(0xFFF8F8FC)
-val AppText = Color(0xFF20202A)
-val AppMuted = Color(0xFF777786)
-val Mint = Color(0xFFE8F8EF)
-val Peach = Color(0xFFFFF0E7)
-val Sky = Color(0xFFEAF4FF)
-val Butter = Color(0xFFFFF7D9)
-val Rose = Color(0xFFFFEDF1)
+val AppPurple = Color(0xFF6C5CE7)
+val AppPurpleDark = Color(0xFF4E3FC4)
+val AppLavender = Color(0xFFEDE9FF)
+val AppBackground = Color(0xFFF8F7FC)
+val AppMuted = Color(0xFF777386)
+val AppGreen = Color(0xFF42B883)
+val AppAmber = Color(0xFFF3AA36)
+val AppRed = Color(0xFFE55F67)
+val AppSky = Color(0xFFE8F4FF)
 
 private val LightColors = lightColorScheme(
     primary = AppPurple,
     onPrimary = Color.White,
     primaryContainer = AppLavender,
-    onPrimaryContainer = AppPurpleDark,
-    secondary = Color(0xFF35B979),
-    tertiary = Color(0xFFF0A824),
+    onPrimaryContainer = Color(0xFF241A66),
+    secondary = AppGreen,
     background = AppBackground,
-    onBackground = AppText,
     surface = Color.White,
-    onSurface = AppText,
-    surfaceVariant = Color(0xFFF0F0F5),
-    onSurfaceVariant = AppMuted,
-    outline = Color(0xFFE2E2EA)
+    onBackground = Color(0xFF1C1B20),
+    onSurface = Color(0xFF1C1B20),
+    error = AppRed
+)
+
+private val DarkColors = darkColorScheme(
+    primary = Color(0xFFB9AEFF),
+    onPrimary = Color(0xFF2F236E),
+    primaryContainer = Color(0xFF473B91),
+    onPrimaryContainer = Color(0xFFE8E2FF),
+    secondary = Color(0xFF7DDBAF),
+    background = Color(0xFF121116),
+    surface = Color(0xFF1B1A20),
+    onBackground = Color(0xFFE9E6ED),
+    onSurface = Color(0xFFE9E6ED),
+    error = Color(0xFFFFB4AB)
 )
 
 @Composable
-fun DailyCompanionTheme(content: @Composable () -> Unit) {
+fun DailyCompanionTheme(darkTheme: Boolean = false, content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = LightColors,
+        colorScheme = if (darkTheme) DarkColors else LightColors,
         typography = MaterialTheme.typography,
         content = content
     )

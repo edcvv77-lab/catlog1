@@ -35,13 +35,18 @@ jobs:
         with:
           gradle-version: '8.13'
 
-      - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace
+      - name: Build installable APK
+        run: |
+          gradle :app:assembleDebug --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk masaedi-alyoumi-v2.0.0.apk
+          sha256sum masaedi-alyoumi-v2.0.0.apk > masaedi-alyoumi-v2.0.0.sha256
 
-      - name: Upload APK
+      - name: Upload final APK
         uses: actions/upload-artifact@v4
         with:
-          name: daily-companion-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: masaedi-alyoumi-v2.0.0
+          path: |
+            masaedi-alyoumi-v2.0.0.apk
+            masaedi-alyoumi-v2.0.0.sha256
           if-no-files-found: error
           retention-days: 30
