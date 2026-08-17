@@ -27,6 +27,7 @@ import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.TrackChanges
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -101,6 +102,7 @@ private enum class QuickType(val title: String, val emoji: String) {
     Habit("عادة جديدة", "✅")
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppRoot(state: AppState) {
     var screen by rememberSaveable { mutableStateOf(AppScreen.Home) }
